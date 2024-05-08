@@ -21,8 +21,8 @@ class TestCreateUser:
 
 
     @allure.title('Невозможность зарегестрировать пользователя с уже используемым логином')
-    def test_create_user_with_exist_login_failure(self, new_user_and_login_data):
-        payload = user_helpers.generate_user_registration_data_with_exist_login(new_user_and_login_data)
+    def test_create_user_with_exist_login_failure(self, new_user_and_authorization_data):
+        payload = user_helpers.generate_user_registration_data_with_exist_login(new_user_and_authorization_data[0])
         with allure.step('Отправка запроса на регистрацию пользователя с уже используемым логином'):
             response = requests.post(self.url, data=payload)
 

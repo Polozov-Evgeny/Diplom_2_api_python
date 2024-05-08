@@ -1,8 +1,11 @@
 import requests
 import allure
+import logging
 from faker import Faker
 from config.urls import Urls
 from config.endpoints import Endpoints
+
+logger = logging.getLogger(__name__)
 
 
 @allure.step('Генерация данных пользователя')
@@ -16,8 +19,8 @@ def generate_user_data():
     return user_data
 
 
-@allure.step('Регистрация нового пользователя и возвращение данных для авторизации')
-def register_new_user_and_return_login_data():
+@allure.step('Регистрация нового пользователя и возвращение авторизационных данных')
+def register_new_user_and_return_authorization_data():
     registration_data = generate_user_data()
     url = f'{Urls.BASE_URL}{Endpoints.CREATE_USER_ACCOUNT}'
     response = requests.post(url, data=registration_data)
@@ -26,24 +29,13 @@ def register_new_user_and_return_login_data():
             'email': registration_data['email'],
             'password': registration_data['password']
         }
-        return login_data
-    else:
-        print('Проблема с регистрацией пользовательского аккаунта')
-
-
-@allure.step('Регистрация нового пользователя и возвращение токенов')
-def register_new_user_and_return_tokens():
-    registration_data = generate_user_data()
-    url = f'{Urls.BASE_URL}{Endpoints.CREATE_USER_ACCOUNT}'
-    response = requests.post(url, data=registration_data)
-    if response.status_code == 200 and response.json()['success'] == True:
-        registration_tokens = {
+        tokens = {
             'accessToken': response.json()['accessToken'],
             'refreshToken': response.json()['refreshToken']
         }
-        return registration_tokens
+        return login_data, tokens
     else:
-        print('Проблема с регистрацией пользовательского аккаунта')
+        logger.error('Проблема с регистрацией пользовательского аккаунта')
 
 
 @allure.step('Авторизация пользователя и возвращение токенов')
@@ -57,7 +49,7 @@ def login_user_and_return_tokens(login_data):
         }
         return login_tokens
     else:
-        print('Проблема с авторизацией пользователя')
+        logger.error('Проблема с авторизацией пользователя')
 
 
 @allure.step('Удаление учетной записи пользователя')
@@ -65,7 +57,7 @@ def delete_user_account(access_token):
     url = f'{Urls.BASE_URL}{Endpoints.DELETE_USER_ACCOUNT}'
     response = requests.delete(url, headers={'Authorization': access_token})
     if not (response.status_code == 202 and response.json()['success'] == True):
-        print('Проблема с удалением пользовательского аккаунт')
+        logger.error('Проблема с удалением пользовательского аккаунт')
 
 
 @allure.step('Генерация данных для регистрации пользователя с уже используемым логином')

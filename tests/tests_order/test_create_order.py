@@ -12,8 +12,8 @@ class TestCreateOrder:
     url = f'{Urls.BASE_URL}{Endpoints.CREATE_ORDER}'
 
     @allure.title('Успешное создание заказа с авторизацией и ингиридиентами')
-    def test_create_order_success(self, new_user_and_tokens):
-        headers = {'Authorization': new_user_and_tokens['accessToken']}
+    def test_create_order_success(self, new_user_and_authorization_data):
+        headers = {'Authorization': new_user_and_authorization_data[1]['accessToken']}
         payload = {'ingredients': order_helpers.generate_ingredient_list()}
         with allure.step('Отправка запроса на создание заказа пользователя'):
             response = requests.post(self.url, headers=headers, data=payload)
@@ -32,8 +32,8 @@ class TestCreateOrder:
 
 
     @allure.title('Неуспешное создание заказа без ингредиентов')
-    def test_create_order_without_ingredients_failure(self, new_user_and_tokens):
-        headers = {'Authorization': new_user_and_tokens['accessToken']}
+    def test_create_order_without_ingredients_failure(self, new_user_and_authorization_data):
+        headers = {'Authorization': new_user_and_authorization_data[1]['accessToken']}
         payload = {'ingredients': None}
         with allure.step('Отправка запроса на создание заказа без ингредиентов'):
             response = requests.post(self.url, headers=headers, data=payload)
@@ -43,8 +43,8 @@ class TestCreateOrder:
 
 
     @allure.title('Неуспешное создание заказа с неверным хешем ингредиентов')
-    def test_create_order_with_wrong_ingredient_hash_failure(self, new_user_and_tokens):
-        headers = {'Authorization': new_user_and_tokens['accessToken']}
+    def test_create_order_with_wrong_ingredient_hash_failure(self, new_user_and_authorization_data):
+        headers = {'Authorization': new_user_and_authorization_data[1]['accessToken']}
         payload = {'ingredients': Data.wrong_ingredient_hash}
         with allure.step('Отправка запроса на создание заказа с неверным хешем ингредиентов'):
             response = requests.post(self.url, headers=headers, data=payload)
